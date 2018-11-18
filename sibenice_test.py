@@ -9,8 +9,7 @@ def test_stav_hadani_slova_vyber_obesence():
     assert stav_hadani_slova(["prvni_obesenec", "druhy_obesenec"], 0) == "prvni_obesenec"
 
 def test_stav_hadani_slova_konec_hry():
-    with pytest.raises(IndexError):
-        vysledek = stav_hadani_slova(["prvni_obesenec", "druhy_obesenec"], 3)
+    assert stav_hadani_slova(["prvni_obesenec", "druhy_obesenec"], 3) == False
 
 def test_vyhodnot_cele_slovo():
     assert vyhodnot("pes") == False

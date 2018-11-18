@@ -20,7 +20,11 @@ def nahodne_slovo(seznam):
     return nahodne_slovo, skryte_slovo
 
 def stav_hadani_slova(seznam, pocet_pismen): #vrati obesence, vzhledem k poctu neuhadnutych pismen
-    return seznam[pocet_pismen]
+    pocet_polozek_v_seznamu = len(seznam)
+    if pocet_pismen <= pocet_polozek_v_seznamu - 1:
+        return seznam[pocet_pismen]
+    else:
+        return False
 
 def vyhodnot(slovo):
     """Funkce, ktera vyhodnoti stav hry. Pokud neni ve skrytem slove podtrzitko, hrac vyhral."""
@@ -28,6 +32,7 @@ def vyhodnot(slovo):
         return True #hra stale bezi
     else:
         return False #hrac vyhral
+
 
 def zapis_pismeno(pismeno, slovo, skryte_slovo, seznam_pouzitych_pismen):
     """Funkce, ktera najde pismeno zadane uzivatelem ve slove a vloziho do skryteho slova. Naopak vytvori slovo zrdcadlove k uzivatelovu
@@ -72,15 +77,16 @@ def zapis_pismeno(pismeno, slovo, skryte_slovo, seznam_pouzitych_pismen):
 
 def opakuj_hru(seznam):
     """Funkce, ktera se zepta hrace, zda chce hrat znovu"""
-    opakuj_uzivatel_odpoved = input("Chces opakovat hru? ano/ne: ")
-    if opakuj_uzivatel_odpoved == "ano":
-        return sibenice(seznam)
-    elif opakuj_uzivatel_odpoved =="ne":
-        print("Konec hry.")
-    else: #pokud neodpovi ano nebo ne, znovu se zepta
-        print("Zadej pouze ano/ne.")
-        opakuj_hru(seznam)
-
+    while True:
+        opakuj_uzivatel_odpoved = input("Chces opakovat hru? ano/ne: ")
+        if not opakuj_uzivatel_odpoved in ("ano","ne"):   #podminka pro zadani x,o
+            print("Zadej pouze ano/ne.")
+            continue
+        else:
+            if opakuj_uzivatel_odpoved == "ano":
+                return "ano"
+            elif opakuj_uzivatel_odpoved =="ne":
+                return "ne"
 
 def sibenice(seznam):
     """Funkce, ktera vygeneruje nahodne slovo a zobrazi jej uzivateli jako retezec podtrzitek
@@ -96,23 +102,34 @@ def sibenice(seznam):
     pocet_pismen = 0 #pocet neuhadnutych pismen je na zacatku nula
 
     while "_" in retezec_se_skrytym_slovem:
-        try:
-            pocet_neuhadnutych_pismen = pocet_neuhadnutych_pismen + pocet_pismen
-            print(stav_hadani_slova(seznam_stavu, pocet_neuhadnutych_pismen)) #vytiskne obrazek obesence dle poctu neuhadnutych pismen
-            print(retezec_se_skrytym_slovem) #zobrazi slovo skryte s podtrziky, pokud uzivatel uhadne - nahradni pismeno podtrzitko
-            pocet_pismen, seznam_pismen, upravene_hadane_slovo, retezec_se_skrytym_slovem = zeptej_se_uzivatele(upravene_hadane_slovo, retezec_se_skrytym_slovem, seznam_pismen)
-            print("Seznam pouzitych pismen: ", seznam_pismen)
-        except ValueError: #vyjimka pokud slovo neobsahuje pismeno zadane uzivatelem
-            pocet_neuhadnutych_pismen_error = pocet_pismen
-        except IndexError: #vyjimka pokud uzivatel neuhadne slovo a vycerpa vsechny "obrazky" obesence
+
+        pocet_neuhadnutych_pismen = pocet_neuhadnutych_pismen + pocet_pismen
+        zobraz_obesence = stav_hadani_slova(seznam_stavu, pocet_neuhadnutych_pismen)
+
+        if zobraz_obesence == False:
             print("Prohrál jsi.")
             print("Hadane slovo bylo: ", slovo)
-            opakuj_hru(seznam)
-            break
-        else:
-            vysledek = vyhodnot(retezec_se_skrytym_slovem)
-            if vysledek == False: #pokud neni ve slove podtrziko hra se ukonci, vyhral hrac
-                print("Hadane slovo bylo: ", slovo)
-                print("Konec hry! Vyhrál jsi.")
-                opakuj_hru(seznam)
-                break
+
+            chces_opakovat_hru = opakuj_hru(seznam) #zepta se uzivatele, zda chce opakovat hru
+            if chces_opakovat_hru =="ano":
+                sibenice(seznam)
+            else:
+                print("Konec hry.")
+                exit()
+
+        print(zobraz_obesence) #vytiskne obrazek obesence dle poctu neuhadnutych pismen
+        print(retezec_se_skrytym_slovem) #zobrazi slovo skryte s podtrziky, pokud uzivatel uhadne - nahradni pismeno podtrzitko
+        pocet_pismen, seznam_pismen, upravene_hadane_slovo, retezec_se_skrytym_slovem = zeptej_se_uzivatele(upravene_hadane_slovo, retezec_se_skrytym_slovem, seznam_pismen)
+        print("Seznam pouzitych pismen: ", seznam_pismen)
+
+        vysledek = vyhodnot(retezec_se_skrytym_slovem)
+        if vysledek == False: #pokud neni ve slove podtrziko hra se ukonci, vyhral hrac
+            print("Hadane slovo bylo: ", slovo)
+            print("Konec hry! Vyhrál jsi.")
+
+            chces_opakovat_hru = opakuj_hru(seznam) #zepta se uzivatele, zda chce opakovat hru
+            if chces_opakovat_hru =="ano":
+                sibenice(seznam)
+            else:
+                print("Konec hry.")
+                exit()
